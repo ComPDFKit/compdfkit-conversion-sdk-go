@@ -165,7 +165,7 @@ You can perform offline authentication using the following method:
 Before using the classes and methods of the ComPDF Conversion SDK in your project, you need to initialize the SDK with a valid license key. If you don’t have a license key, feel free to contact the [ComPDF team](https://www.compdf.com/contact-sales) to obtain one.
 
 ```go
-import compdf "github.com/ComPDFKit/compdfkit-conversion-sdk-go"
+import compdf "github.com/ComPDFKit/compdfkit-conversion-sdk-go/v4"
 
 err := compdf.LicenseVerify("LICENSE_KEY_PATH", "DEVICE_ID", "APP_ID")
 ```

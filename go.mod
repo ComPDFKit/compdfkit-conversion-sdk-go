@@ -1,3 +1,3 @@
-module 192.168.11.12/dengyujia/conversion-go.git
+module github.com/ComPDFKit/compdfkit-conversion-sdk-go/v4
 
 go 1.21
