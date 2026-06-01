@@ -108,6 +108,14 @@ The ComPDF Conversion SDK for Go should contain at least the following:
 - ***"include"*** - C SDK header files used by CGO.
 - ***"lib"*** - Platform-specific dynamic libraries (e.g., `compdfkit_conversion.dll`, `libcompdfkit_conversion.so`, `libcompdfkit_conversion.dylib`).
 
+> **Note:** After building your Go application, the native dynamic libraries under `lib/<os>/<arch>/` (e.g., `libDocumentAI.so.*`, `libonnxruntime.so.*`, `libopencv_world.so.*` on Linux, or the corresponding `.dll` / `.dylib` files on Windows and macOS) are **not** statically linked into the resulting binary. You must make sure they can be located by the dynamic loader at runtime, otherwise the application will fail to start with a "library not found" error. Common approaches:
+>
+> - **Windows:** copy the `.dll` files next to your executable, or add the directory containing them to the `PATH` environment variable.
+> - **Linux:** add the directory containing the `.so` files to `LD_LIBRARY_PATH`, install them into a system path such as `/usr/local/lib` (and run `ldconfig`), or build your binary with an embedded `rpath`/`runpath` (e.g., `-Wl,-rpath,$ORIGIN/lib` via `CGO_LDFLAGS`).
+> - **macOS:** add the directory containing the `.dylib` files to `DYLD_LIBRARY_PATH`, or embed an `rpath` (e.g., `-Wl,-rpath,@executable_path/lib` via `CGO_LDFLAGS`) and ship the libraries alongside your binary.
+>
+> For redistribution, it is recommended to package the native libraries together with your executable and use a relative `rpath`/`PATH` so the application works out of the box on end-user machines.
+
 ### 2.2.1 Apply the License Key
 If you don't have a license key, please check out [how to obtain a license key](/guides/conversion-sdk/go/requirements).
 
