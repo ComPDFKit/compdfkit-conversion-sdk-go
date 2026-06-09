@@ -108,36 +108,18 @@ Convert scanned documents and scanned PDFs into searchable PDFs while perfectly 
 | macOS    | - Mac OS 11.0 or higher.                 | Go 1.21 or higher, with CGO enabled and Xcode Command Line Tools installed.       | -     |
 | Linux    | - Linux x64.<br/>- GLIBC 2.31 or higher. | Go 1.21 or higher, with CGO enabled and a C compiler (e.g., gcc) available.       | -     |
 
-## How to Run a Demo
-
-ComPDF Conversion SDK for Go provides a demo for developers to learn how to call the SDK. You can find the demo in the ***"samples"*** folder.
-
-1. Add the ComPDF Conversion SDK Go module as a dependency:
-   
-   ```shell
-   go get github.com/ComPDFKit/conversion-go
-   ```
-
-2. Import the module in the demo and fill in the input and output paths.
-
-3. Run the demo:
-   
-   ```shell
-   go run demo.go
-   ```
-
 ## Integration
 
 ### Install via Go Modules
 
 ```go
-go get github.com/ComPDFKit/conversion-go
+go get github.com/ComPDFKit/compdfkit-conversion-sdk-go/v4
 ```
 
 ### Verify License and Initialize
 
 ```go
-import compdf "github.com/ComPDFKit/conversion-go"
+import compdf "github.com/ComPDFKit/compdfkit-conversion-sdk-go/v4"
 
 err := compdf.LicenseVerify("LICENSE_KEY", "DEVICE_ID", "APP_ID")
 if err != nil {
@@ -203,7 +185,7 @@ Before using the classes and methods of the ComPDF Conversion SDK in your projec
 ```go
 import compdf "github.com/ComPDFKit/conversion-go"
 
-err := compdf.LicenseVerify("LICENSE_KEY", "DEVICE_ID", "APP_ID")
+err := compdf.LicenseVerify("PATH_TO_LICENSE_KEY", "DEVICE_ID", "APP_ID")
 if err != nil {
     return err
 }
