@@ -2,7 +2,7 @@
 
 As part of the KDAN ecosystem, ComPDF Conversion SDK brings PDF conversion capabilities to your Go backend services. Convert PDF files into editable Office documents, images, HTML, and more using a native Go API — perfect for server-side document processing pipelines, REST APIs, and microservices that need to extract and transform PDF content reliably.
 
-> If you find this library helpful, please consider giving us a ⭐ **Star** on GitHub! Have feedback or questions? Join the conversation in our [Discussions](https://github.com/orgs/ComPDFKit/discussions).
+> If you find this library helpful, please consider giving us a ⭐ **Star** on GitHub! Have feedback or questions? Join the conversation in our [Discussions](https://github.com/ComPDFKit/compdfkit-conversion-sdk-go/discussions).
 
 **Supported Features**
 
