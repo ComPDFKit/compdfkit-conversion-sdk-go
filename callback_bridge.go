@@ -1,7 +1,7 @@
 package compdf
 
 /*
-#cgo CFLAGS: -I. -Iinclude -D_CRT_SECURE_NO_WARNINGS
+#cgo CFLAGS: -I. -Iinclude -Iinclude/common -D_CRT_SECURE_NO_WARNINGS
 #cgo windows LDFLAGS: -L${SRCDIR}/lib/windows/amd64 -lcpdfconversionsdk
 #cgo linux   LDFLAGS: -L${SRCDIR}/lib/linux/amd64   -lcpdfconversionsdk -Wl,-rpath,$ORIGIN
 #cgo darwin,amd64 LDFLAGS: -L${SRCDIR}/lib/darwin/amd64 -lcpdfconversionsdk
@@ -34,10 +34,10 @@ type callbackRegistry struct {
 // the same getter — we own one CString per result type per active callback
 // and free it on the next overwrite or when the conversion finishes.
 type callbackBuffers struct {
-	mu        sync.Mutex
-	ocr       *C.char
-	layout    *C.char
-	tableRes  *C.char
+	mu       sync.Mutex
+	ocr      *C.char
+	layout   *C.char
+	tableRes *C.char
 }
 
 func (b *callbackBuffers) replace(target **C.char, val string) *C.char {

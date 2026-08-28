@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdbool.h>
 
-#include "common/com_config_macros.h"
+#include "com_config_macros.h"
 
 #if defined(_WIN32)
 #define COMPDFKIT_STRING const wchar_t*
@@ -91,6 +91,11 @@ typedef enum _CSDKErrorCode {
     e_CErrLicenseUnsupportedAPI = 92,
     e_CErrLicenseMismatch = 93,
     e_CErrInvalidTable = 94,
+
+    /// The source document uses a feature this SDK cannot lay out yet, so
+    /// no output was produced. Distinct from e_CErrIO: nothing failed on
+    /// the disk or in the writer, the document itself is out of scope.
+    e_CErrUnsupportedFeature = 95,
 
     /// Unknown error
     e_CErrUnknown = 100
@@ -292,10 +297,22 @@ typedef struct _CConvertOption{
 
     /// Specify the OCR languages.
     COCRLanguage* languages;
+
+    /// Whether to classify and correct document orientation before OCR image recognition.
+    bool enable_document_orientation_classification;
+
+    /// Whether to apply DocumentAI dewarp before OCR image recognition.
+    bool enable_document_dewarp;
 } CConvertOption;
+
+#define CPDF_CONVERT_OPTION_DEFAULT { \
+    true, true, true, true, true, true, false, false, false, true, true, false, true, true, false, \
+    0, 4.0f, e_PageLayoutModeFlow, e_CForTable, e_CSinglePage, e_CAll, e_CColor, e_CJPG, \
+    {0}, {0}, 0, false, false \
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //COMPDFKIT_BASICTYPES_C_H
+#endif // COMPDFKIT_BASICTYPES_C_H

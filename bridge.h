@@ -89,6 +89,8 @@ typedef struct {
      * COCRLanguage array that the C SDK expects. */
     const int* languages;
     int language_count;
+    bool enable_document_orientation_classification;
+    bool enable_document_dewarp;
 } GoConvertOption;
 
 /* Opaque handle used to identify a Go-side callback in the registry. 0 means

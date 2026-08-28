@@ -5,31 +5,34 @@ package compdf
 // by the corresponding Start* function. End users do not construct this type
 // directly.
 type convertOptions struct {
-	EnableAILayout             bool
-	EnableAITableRecognition   bool
-	ContainImage               bool
-	ContainPageBackgroundImage bool
-	JSONContainTable           bool
-	ContainAnnotation          bool
-	ExcelAllContent            bool
-	ExcelCSVFormat             bool
-	EnableOCR                  bool
-	TransparentText            bool
-	TxtTableFormat             bool
-	ImagePathEnhance           bool
-	FormulaToImage             bool
-	AutoCreateFolder           bool
-	OutputDocumentPerPage      bool
-	ImageScaling               float32
-	PageLayoutMode             PageLayoutMode
-	ExcelWorksheetOption       ExcelWorksheetOption
-	HtmlPageOption             HtmlPageOption
-	OCROption                  OCROption
-	ImageColorMode             ImageColorMode
-	ImageType                  ImageType
-	FontName                   string
-	PageRanges                 string
-	Languages                  []OCRLanguage
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	ContainImage                            bool
+	ContainPageBackgroundImage              bool
+	JSONContainTable                        bool
+	ContainAnnotation                       bool
+	ExcelAllContent                         bool
+	ExcelCSVFormat                          bool
+	EnableOCR                               bool
+	TransparentText                         bool
+	TxtTableFormat                          bool
+	ImagePathEnhance                        bool
+	FormulaToImage                          bool
+	AutoCreateFolder                        bool
+	OutputDocumentPerPage                   bool
+	ImageScaling                            float32
+	PageLayoutMode                          PageLayoutMode
+	ExcelWorksheetOption                    ExcelWorksheetOption
+	HtmlPageOption                          HtmlPageOption
+	OCROption                               OCROption
+	ImageColorMode                          ImageColorMode
+	ImageType                               ImageType
+	FontName                                string
+	PageRanges                              string
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 func defaultConvertOptions() convertOptions {
@@ -42,7 +45,9 @@ func defaultConvertOptions() convertOptions {
 		ContainAnnotation:          true,
 		TxtTableFormat:             true,
 		AutoCreateFolder:           true,
-		ImageScaling:               1.0,
+		TransparentText:            true,
+		FormulaToImage:             true,
+		ImageScaling:               4.0,
 		PageLayoutMode:             PageLayoutFlow,
 		ExcelWorksheetOption:       ExcelForTable,
 		HtmlPageOption:             HtmlSinglePage,
@@ -54,18 +59,21 @@ func defaultConvertOptions() convertOptions {
 
 // WordOptions configures PDF->Word conversion.
 type WordOptions struct {
-	ContainImage               bool
-	ContainAnnotation          bool
-	EnableAILayout             bool
-	EnableAITableRecognition   bool
-	FormulaToImage             bool
-	EnableOCR                  bool
-	LayoutMode                 PageLayoutMode
-	PageRanges                 string
-	ContainPageBackgroundImage bool
-	OutputDocumentPerPage      bool
-	OCROption                  OCROption
-	Languages                  []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	EnableOCR                               bool
+	LayoutMode                              PageLayoutMode
+	PageRanges                              string
+	ContainPageBackgroundImage              bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewWordOptions returns WordOptions initialized with SDK defaults.
@@ -75,6 +83,7 @@ func NewWordOptions() WordOptions {
 		ContainAnnotation:          true,
 		EnableAILayout:             true,
 		EnableAITableRecognition:   true,
+		FormulaToImage:             true,
 		LayoutMode:                 PageLayoutFlow,
 		ContainPageBackgroundImage: true,
 		OCROption:                  OCRAll,
@@ -95,25 +104,30 @@ func (o WordOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // ExcelOptions configures PDF->Excel conversion.
 type ExcelOptions struct {
-	ContainImage             bool
-	ContainAnnotation        bool
-	EnableAILayout           bool
-	EnableAITableRecognition bool
-	FormulaToImage           bool
-	EnableOCR                bool
-	PageRanges               string
-	AllContent               bool
-	CSVFormat                bool
-	WorksheetOption          ExcelWorksheetOption
-	AutoCreateFolder         bool
-	OutputDocumentPerPage    bool
-	OCROption                OCROption
-	Languages                []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	EnableOCR                               bool
+	PageRanges                              string
+	AllContent                              bool
+	CSVFormat                               bool
+	WorksheetOption                         ExcelWorksheetOption
+	AutoCreateFolder                        bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewExcelOptions returns ExcelOptions initialized with SDK defaults.
@@ -123,6 +137,7 @@ func NewExcelOptions() ExcelOptions {
 		ContainAnnotation:        true,
 		EnableAILayout:           true,
 		EnableAITableRecognition: true,
+		FormulaToImage:           true,
 		WorksheetOption:          ExcelForTable,
 		AutoCreateFolder:         true,
 		OCROption:                OCRAll,
@@ -145,22 +160,27 @@ func (o ExcelOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // PptOptions configures PDF->PPT conversion.
 type PptOptions struct {
-	ContainImage               bool
-	ContainAnnotation          bool
-	EnableAILayout             bool
-	EnableAITableRecognition   bool
-	FormulaToImage             bool
-	EnableOCR                  bool
-	PageRanges                 string
-	ContainPageBackgroundImage bool
-	OutputDocumentPerPage      bool
-	OCROption                  OCROption
-	Languages                  []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	EnableOCR                               bool
+	PageRanges                              string
+	ContainPageBackgroundImage              bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewPptOptions returns PptOptions initialized with SDK defaults.
@@ -170,6 +190,7 @@ func NewPptOptions() PptOptions {
 		ContainAnnotation:          true,
 		EnableAILayout:             true,
 		EnableAITableRecognition:   true,
+		FormulaToImage:             true,
 		ContainPageBackgroundImage: true,
 		OCROption:                  OCRAll,
 	}
@@ -188,24 +209,29 @@ func (o PptOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // HtmlOptions configures PDF->HTML conversion.
 type HtmlOptions struct {
-	ContainImage               bool
-	ContainAnnotation          bool
-	EnableAILayout             bool
-	EnableAITableRecognition   bool
-	FormulaToImage             bool
-	EnableOCR                  bool
-	LayoutMode                 PageLayoutMode
-	PageRanges                 string
-	PageOption                 HtmlPageOption
-	ContainPageBackgroundImage bool
-	OutputDocumentPerPage      bool
-	OCROption                  OCROption
-	Languages                  []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	EnableOCR                               bool
+	LayoutMode                              PageLayoutMode
+	PageRanges                              string
+	PageOption                              HtmlPageOption
+	ContainPageBackgroundImage              bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewHtmlOptions returns HtmlOptions initialized with SDK defaults.
@@ -215,6 +241,7 @@ func NewHtmlOptions() HtmlOptions {
 		ContainAnnotation:          true,
 		EnableAILayout:             true,
 		EnableAITableRecognition:   true,
+		FormulaToImage:             true,
 		LayoutMode:                 PageLayoutFlow,
 		PageOption:                 HtmlSinglePage,
 		ContainPageBackgroundImage: true,
@@ -237,6 +264,8 @@ func (o HtmlOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
@@ -254,7 +283,7 @@ func NewImageOptions() ImageOptions {
 	return ImageOptions{
 		ImageType:      ImageJPG,
 		ImageColorMode: ImageColor,
-		ImageScaling:   1.0,
+		ImageScaling:   4.0,
 	}
 }
 
@@ -271,15 +300,18 @@ func (o ImageOptions) toConvert() convertOptions {
 
 // MarkdownOptions configures PDF->Markdown conversion.
 type MarkdownOptions struct {
-	ContainImage             bool
-	ContainAnnotation        bool
-	EnableAILayout           bool
-	EnableAITableRecognition bool
-	EnableOCR                bool
-	PageRanges               string
-	OutputDocumentPerPage    bool
-	OCROption                OCROption
-	Languages                []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	EnableOCR                               bool
+	PageRanges                              string
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewMarkdownOptions returns MarkdownOptions initialized with SDK defaults.
@@ -305,22 +337,27 @@ func (o MarkdownOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // RtfOptions configures PDF->RTF conversion.
 type RtfOptions struct {
-	ContainImage               bool
-	ContainAnnotation          bool
-	EnableAILayout             bool
-	EnableAITableRecognition   bool
-	FormulaToImage             bool
-	EnableOCR                  bool
-	PageRanges                 string
-	ContainPageBackgroundImage bool
-	OutputDocumentPerPage      bool
-	OCROption                  OCROption
-	Languages                  []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	EnableOCR                               bool
+	PageRanges                              string
+	ContainPageBackgroundImage              bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewRtfOptions returns RtfOptions initialized with SDK defaults.
@@ -330,6 +367,7 @@ func NewRtfOptions() RtfOptions {
 		ContainAnnotation:          true,
 		EnableAILayout:             true,
 		EnableAITableRecognition:   true,
+		FormulaToImage:             true,
 		ContainPageBackgroundImage: true,
 		OCROption:                  OCRAll,
 	}
@@ -348,19 +386,24 @@ func (o RtfOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // TxtOptions configures PDF->TXT conversion.
 type TxtOptions struct {
-	EnableAILayout           bool
-	EnableAITableRecognition bool
-	EnableOCR                bool
-	PageRanges               string
-	TableFormat              bool
-	OutputDocumentPerPage    bool
-	OCROption                OCROption
-	Languages                []OCRLanguage
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	EnableOCR                               bool
+	PageRanges                              string
+	TableFormat                             bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewTxtOptions returns TxtOptions initialized with SDK defaults.
@@ -384,21 +427,26 @@ func (o TxtOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // JsonOptions configures PDF->JSON conversion.
 type JsonOptions struct {
-	ContainImage             bool
-	ContainAnnotation        bool
-	EnableAILayout           bool
-	EnableAITableRecognition bool
-	EnableOCR                bool
-	PageRanges               string
-	ContainTable             bool
-	OutputDocumentPerPage    bool
-	OCROption                OCROption
-	Languages                []OCRLanguage
+	ContainImage                            bool
+	ContainAnnotation                       bool
+	EnableAILayout                          bool
+	EnableAITableRecognition                bool
+	EnableOCR                               bool
+	PageRanges                              string
+	ContainTable                            bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewJsonOptions returns JsonOptions initialized with SDK defaults.
@@ -426,21 +474,26 @@ func (o JsonOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // SearchablePdfOptions configures PDF->SearchablePDF conversion.
 type SearchablePdfOptions struct {
-	ContainImage               bool
-	EnableOCR                  bool
-	EnableAITableRecognition   bool
-	FormulaToImage             bool
-	PageRanges                 string
-	ContainPageBackgroundImage bool
-	OutputDocumentPerPage      bool
-	OCROption                  OCROption
-	Languages                  []OCRLanguage
-	TransparentText            bool
+	ContainImage                            bool
+	EnableOCR                               bool
+	EnableAITableRecognition                bool
+	FormulaToImage                          bool
+	PageRanges                              string
+	ContainPageBackgroundImage              bool
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+	TransparentText                         bool
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewSearchablePdfOptions returns SearchablePdfOptions initialized with SDK defaults.
@@ -448,8 +501,10 @@ func NewSearchablePdfOptions() SearchablePdfOptions {
 	return SearchablePdfOptions{
 		ContainImage:               true,
 		EnableAITableRecognition:   true,
+		FormulaToImage:             true,
 		ContainPageBackgroundImage: true,
 		OCROption:                  OCRAll,
+		TransparentText:            true,
 	}
 }
 
@@ -465,18 +520,23 @@ func (o SearchablePdfOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }
 
 // OfdOptions configures PDF->OFD conversion.
 type OfdOptions struct {
-	TransparentText          bool
-	EnableOCR                bool
-	EnableAITableRecognition bool
-	PageRanges               string
-	OutputDocumentPerPage    bool
-	OCROption                OCROption
-	Languages                []OCRLanguage
+	TransparentText                         bool
+	EnableOCR                               bool
+	EnableAITableRecognition                bool
+	PageRanges                              string
+	OutputDocumentPerPage                   bool
+	OCROption                               OCROption
+	Languages                               []OCRLanguage
+
+	EnableDocumentOrientationClassification bool
+	EnableDocumentDewarp                    bool
 }
 
 // NewOfdOptions returns OfdOptions initialized with SDK defaults.
@@ -484,6 +544,7 @@ func NewOfdOptions() OfdOptions {
 	return OfdOptions{
 		EnableAITableRecognition: true,
 		OCROption:                OCRAll,
+		TransparentText:          true,
 	}
 }
 
@@ -496,5 +557,7 @@ func (o OfdOptions) toConvert() convertOptions {
 	c.OutputDocumentPerPage = o.OutputDocumentPerPage
 	c.OCROption = o.OCROption
 	c.Languages = o.Languages
+	c.EnableDocumentOrientationClassification = o.EnableDocumentOrientationClassification
+	c.EnableDocumentDewarp = o.EnableDocumentDewarp
 	return c
 }

@@ -47,6 +47,7 @@ const (
 	ErrLicenseUnsupportedAPI      ErrorCode = 92
 	ErrLicenseMismatch            ErrorCode = 93
 	ErrInvalidTable               ErrorCode = 94
+	ErrUnsupportedFeature         ErrorCode = 95
 	ErrUnknown                    ErrorCode = 100
 )
 
@@ -92,6 +93,7 @@ var errorMessages = map[ErrorCode]string{
 	ErrLicenseUnsupportedAPI:      "license does not support this api",
 	ErrLicenseMismatch:            "license does not match device/module/version",
 	ErrInvalidTable:               "invalid table data",
+	ErrUnsupportedFeature:         "source document uses an unsupported feature",
 	ErrUnknown:                    "unknown error",
 }
 

@@ -65,6 +65,8 @@ func runConvert(fn converter, filePath, password, outputPath string, opts conver
 		cOpt.languages = (*C.int)(unsafe.Pointer(&langs[0]))
 		cOpt.language_count = C.int(len(langs))
 	}
+	cOpt.enable_document_orientation_classification = C.bool(opts.EnableDocumentOrientationClassification)
+	cOpt.enable_document_dewarp = C.bool(opts.EnableDocumentDewarp)
 
 	handle, cleanup := registerCallback(cb)
 	defer cleanup()

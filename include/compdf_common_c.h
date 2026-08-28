@@ -13,16 +13,16 @@ extern "C" {
 
 #include "compdf_basictypes_c.h"
 
-/// \brief Verifies the license for using the COMPDFKit SDK.
+/// \brief Verifies the license for using the SDK.
 ///
-/// \param[in] license The license key string provided by COMPDFKit.
+/// \param[in] license The license key string provided by the SDK.
 /// \param[in] device_id Unique identifier of the device on which the SDK will be used.
 /// \param[in] app_id Application ID associated with the license.
 /// \return \link CSDKErrorCode \endlink indicating the success or failure of the license verification process.
 COMPDFKIT_DECL
 CSDKErrorCode CSDK_COMPDFKIT_CALL CPDF_LicenseVerify(const char* license, const char* device_id, const char* app_id);
 
-/// \brief Initializes the COMPDFKit SDK with the specified resource path.
+/// \brief Initializes the SDK with the specified resource path.
 ///
 /// \param[in] resource_path Path to the resources required by the SDK.
 COMPDFKIT_DECL
@@ -58,13 +58,13 @@ int CSDK_COMPDFKIT_CALL CPDF_GetPageCount(COMPDFKIT_STRING file_path, COMPDFKIT_
 COMPDFKIT_DECL
 int CSDK_COMPDFKIT_CALL CPDF_GetRemainingPageQuota();
 
-/// \brief Retrieves the version of the COMPDFKit SDK.
+/// \brief Retrieves the version of the SDK.
 ///
 /// \param[out] version Pointer to a buffer where the SDK version will be stored.
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_GetVersion(char* version);
 
-/// \brief Releases all resources and cleans up the COMPDFKit SDK.
+/// \brief Releases all resources and cleans up the SDK.
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_Release();
 

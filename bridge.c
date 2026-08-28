@@ -141,6 +141,8 @@ static void fill_convert_option(CConvertOption* dst, const GoConvertOption* src,
     }
     dst->languages = lang_buf;
     dst->language_count = n;
+    dst->enable_document_orientation_classification = src->enable_document_orientation_classification;
+    dst->enable_document_dewarp = src->enable_document_dewarp;
 }
 
 /* Build a populated CConvertCallback. Optional handlers (ocr/layout/table
