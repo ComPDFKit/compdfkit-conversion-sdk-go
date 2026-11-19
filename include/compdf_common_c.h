@@ -22,6 +22,12 @@ extern "C" {
 COMPDFKIT_DECL
 CSDKErrorCode CSDK_COMPDFKIT_CALL CPDF_LicenseVerify(const char* license, const char* device_id, const char* app_id);
 
+/// \brief Returns the currently verified license type.
+/// Returns e_CLicenseUnknown before verification, after failed verification,
+/// or while releasing. Does not consume quota or verify the license again.
+COMPDFKIT_DECL
+CLicenseType CSDK_COMPDFKIT_CALL CPDF_GetLicenseType();
+
 /// \brief Initializes the SDK with the specified resource path.
 ///
 /// \param[in] resource_path Path to the resources required by the SDK.
@@ -30,16 +36,25 @@ void CSDK_COMPDFKIT_CALL CPDF_Initialize(COMPDFKIT_STRING resource_path);
 
 /// \brief Configures logging settings for the SDK.
 ///
-/// \param[in] enable_info If true, enables info level logging.
-/// \param[in] enable_warning If true, enables warning level logging.
+/// When both flags are false, only error messages are logged.
+/// \param[in] enable_info If true, enables info level logging (info, warning and error messages).
+/// \param[in] enable_warning If true and enable_info is false, enables warning level logging (warning and error messages).
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_SetLogger(bool enable_info, bool enable_warning);
 
-/// \brief Sets up the document AI model used for advanced processing like OCR.
+/// \brief Merges DocumentAI components from a model package used for advanced processing like OCR.
+/// \pre Stop new SDK calls and join all active conversion/inference callers
+/// before configuring or reloading models; lifecycle calls must be serialized.
 ///
-/// \param[in] model_path Path to the AI model file.
-/// \param[in] ocr_language Language setting for OCR operations.
-/// \return \link CSDKErrorCode \endlink indicating the success or failure of setting up the AI model.
+/// Each call loads only the capabilities contained in the given model package and
+/// merges them with the capabilities already loaded; it does not replace them.
+/// If a package fails to load, the capabilities loaded before are kept.
+///
+/// \param[in] model_path Path to the model package file, e.g. "documentai.model".
+/// \param[in] gpu_id Index of the GPU used by the AI model. -1 disables GPU.
+/// \return \link CSDKErrorCode \endlink indicating the success or failure of loading the model package.
+/// e_CErrInvalidArg if model_path is empty; e_CErrConverting while conversion tasks
+/// are running or a release is pending.
 COMPDFKIT_DECL
 CSDKErrorCode CSDK_COMPDFKIT_CALL CPDF_SetDocumentAIModel(
     COMPDFKIT_STRING model_path, int gpu_id);
@@ -48,7 +63,8 @@ CSDKErrorCode CSDK_COMPDFKIT_CALL CPDF_SetDocumentAIModel(
 ///
 /// \param[in] file_path Path to the PDF file.
 /// \param[in] password Password for opening the PDF file (if required).
-/// \return The number of pages in the PDF file as an integer.
+/// \return The number of pages in the PDF file; 0 if the file cannot be opened
+/// (for example, a wrong password); -1 while library resources are being released or configured.
 COMPDFKIT_DECL
 int CSDK_COMPDFKIT_CALL CPDF_GetPageCount(COMPDFKIT_STRING file_path, COMPDFKIT_STRING password);
 
@@ -60,19 +76,27 @@ int CSDK_COMPDFKIT_CALL CPDF_GetRemainingPageQuota();
 
 /// \brief Retrieves the version of the SDK.
 ///
-/// \param[out] version Pointer to a buffer where the SDK version will be stored.
+/// \param[out] version Caller-allocated buffer that receives the null-terminated
+/// version string, e.g. "4.3.0". It must be large enough for the string, e.g. 32 bytes.
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_GetVersion(char* version);
 
 /// \brief Releases all resources and cleans up the SDK.
+/// If synchronous conversion tasks are still running, cleanup is deferred until
+/// the last one returns; new tasks are refused meanwhile.
+/// \pre Stop new SDK calls and join all active callers before releasing resources.
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_Release();
 
 /// \brief Release the memory by the AI model. If you want to use the AI function again after this call, you need to call the \link CPDF_SetDocumentAIModel \endlink interface again.
+/// \pre Stop new SDK calls and join all conversion/inference callers first.
+/// This function does not cancel in-flight or queued inference.
 COMPDFKIT_DECL
 void CSDK_COMPDFKIT_CALL CPDF_ReleaseDocumentAIModel();
 
 /// \brief Sets the number of AI models for layout analysis and table recognition.
+/// \pre Call before inference starts, or after stopping and joining all callers.
+/// The call is ignored while conversion tasks are running or a release is pending.
 ///
 /// \param[in] layout_model_count Number of layout analysis models to be used.
 /// \param[in] table_model_count Number of table recognition models to be used.

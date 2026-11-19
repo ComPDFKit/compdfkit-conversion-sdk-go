@@ -137,6 +137,21 @@ const (
 	OCRLangAuto        OCRLanguage = 16
 )
 
+// WordPdfBookmarkMode says how the PDF bookmarks (the outline a reader shows
+// beside the pages) are generated when converting a Word document to PDF.
+type WordPdfBookmarkMode int
+
+const (
+	// WordPdfBookmarkNone generates no bookmarks.
+	WordPdfBookmarkNone WordPdfBookmarkMode = 0
+	// WordPdfBookmarkHeadings generates one bookmark per heading (a paragraph
+	// with an outline level), nested by level.
+	WordPdfBookmarkHeadings WordPdfBookmarkMode = 1
+	// WordPdfBookmarkWordBookmarks generates one bookmark per Word bookmark,
+	// named after it.
+	WordPdfBookmarkWordBookmarks WordPdfBookmarkMode = 2
+)
+
 // PageLayoutMode mirrors CPageLayoutMode.
 type PageLayoutMode int
 

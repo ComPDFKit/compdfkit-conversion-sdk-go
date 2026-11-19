@@ -17,6 +17,13 @@ extern "C" {
 #define CSDK_COMPDFKIT_CALL
 #endif  // _WIN32
 
+/// \brief Type of the currently verified license.
+typedef enum _CLicenseType {
+    e_CLicenseUnknown = 0,
+    e_CLicenseTrial = 1,
+    e_CLicenseFormal = 2
+} CLicenseType;
+
 /// \brief Error code.
 typedef enum _CSDKErrorCode {
     /// Success, and no error occurs.
@@ -75,26 +82,42 @@ typedef enum _CSDKErrorCode {
     /// Currently executing conversion task.
     e_CErrConverting = 60,
 
-    /// Document AI error code
+    /// Invalid argument provided.
     e_CErrInvalidArg = 80,
+    /// The handle is invalid, possibly uninitialized or already released.
     e_CErrInvalidHandle = 81,
+    /// The model file format is invalid or corrupted.
     e_CErrModelInvalidFormat = 82,
+    /// The model does not support the requested function or operation.
     e_CErrModelFunctionUnsupported = 83,
+    /// The model format is not supported by this system or SDK.
     e_CErrModelFormatUnsupported = 84,
+    /// The model is incompatible with the current SDK version.
     e_CErrModelSDKMismatch = 85,
+    /// The image data is empty or not provided.
     e_CErrImageDataEmpty = 86,
+    /// The image width or height is invalid (e.g., less than or equal to zero).
     e_CErrImageWHError = 87,
+    /// The image format is not supported.
     e_CErrImageUnsupportedFormat = 88,
+    /// The image is invalid or corrupted.
     e_CErrImageInvalid = 89,
+    /// The resource (e.g., license, token) has expired.
     e_CErrExpire = 90,
+    /// A required argument is missing.
     e_CErrMissingArg = 91,
+    /// The current license does not support calling this API.
     e_CErrLicenseUnsupportedAPI = 92,
+    /// The license does not match the device, module, or version.
     e_CErrLicenseMismatch = 93,
+    /// The table data is invalid or null.
     e_CErrInvalidTable = 94,
 
-    /// The source document uses a feature this SDK cannot lay out yet, so
-    /// no output was produced. Distinct from e_CErrIO: nothing failed on
-    /// the disk or in the writer, the document itself is out of scope.
+    /// The source document uses a feature this SDK cannot fully reproduce,
+    /// or the requested output cannot carry the input's content. A usable
+    /// output may still have been written: Word to PDF normally still
+    /// produces the PDF and reports this in its optional diagnostics.
+    /// Distinct from e_CErrIO: nothing failed on the disk or in the writer.
     e_CErrUnsupportedFeature = 95,
 
     /// Unknown error
@@ -160,6 +183,15 @@ typedef enum _COCROption
     e_CAll,
 } COCROption;
 
+/// \brief DocumentAI table recognition model profile.
+typedef enum _CTableRecognitionAccuracy
+{
+    /// Prioritize recognition accuracy; may use more resources.
+    e_CHighAccuracy = 0,
+    /// Balanced recognition accuracy, resource usage, and throughput.
+    e_CBalanced = 1,
+} CTableRecognitionAccuracy;
+
 /// \brief Image color mode.
 typedef enum _CImageColorMode
 {
@@ -217,6 +249,18 @@ typedef enum _CHtmlOption
     /// Convert the PDF file into multiple HTML files. Each HTML file corresponds to a PDF page, and users can navigate to the next HTML file via a link at the bottom of the HTML page.
     e_CMultiPageWithBookmark,
 } CHtmlOption;
+
+/// \brief How the PDF bookmarks (the outline shown in a reader's navigation
+/// panel) are generated when converting a Word document to PDF.
+typedef enum _CWordPdfBookmarkMode {
+    /// Do not generate bookmarks.
+    e_CWordPdfBookmarkNone = 0,
+    /// One bookmark per heading, that is per paragraph with an outline level,
+    /// nested by level.
+    e_CWordPdfBookmarkHeadings,
+    /// One bookmark per Word bookmark, named after it.
+    e_CWordPdfBookmarkWordBookmarks,
+} CWordPdfBookmarkMode;
 
 /// \brief Convert options.
 typedef struct _CConvertOption{
@@ -295,20 +339,49 @@ typedef struct _CConvertOption{
     /// Specify the pages to convert, e.g. "1-3,5,7-9"
     char page_ranges[256];
 
-    /// Specify the OCR languages.
+    /// Specify the OCR languages: an array of language_count entries, at most 32 of
+    /// which are used. If OCR is enabled and no language is given, English is used.
     COCRLanguage* languages;
 
     /// Whether to classify and correct document orientation before OCR image recognition.
+    /// Takes effect only when enable_ocr is true; requires the document_process.model package.
     bool enable_document_orientation_classification;
 
     /// Whether to apply DocumentAI dewarp before OCR image recognition.
+    /// Takes effect only when enable_ocr is true; requires the document_process.model package.
     bool enable_document_dewarp;
+
+    /// Whether to size the output page from the image's own resolution, matching it
+    /// to the nearest standard paper. Only takes effect when the input is an image
+    /// file; when disabled, one image pixel becomes one page point.
+    bool enable_auto_page_size;
+
+    /// Specify the output page width in points (1 pt = 1/72 inch), or 0 to not
+    /// specify one. Set together with custom_page_height to choose the page
+    /// outright, which takes precedence over enable_auto_page_size. The size is
+    /// used exactly as given, orientation included, and the image is scaled to
+    /// fit inside it without cropping. Only takes effect when the input is an
+    /// image file. For example A4 is 595.28 x 841.89, JIS B5 is 515.91 x 728.50.
+    float custom_page_width;
+
+    /// Specify the output page height in points. See custom_page_width.
+    float custom_page_height;
+
+    /// Table recognition accuracy. CPDF_CONVERT_OPTION_DEFAULT sets e_CBalanced;
+    /// a zero-initialized structure gives e_CHighAccuracy. e_CHighAccuracy requires
+    /// the table_legacy.model package; if the model of the requested accuracy is not
+    /// loaded, the conversion still succeeds, but tables are recognized
+    /// with the rule-based method instead, so the result differs.
+    CTableRecognitionAccuracy table_recognition_accuracy;
+
+    /// How the PDF bookmarks are generated. Only takes effect for Word to PDF.
+    CWordPdfBookmarkMode word_pdf_bookmark_mode;
 } CConvertOption;
 
 #define CPDF_CONVERT_OPTION_DEFAULT { \
     true, true, true, true, true, true, false, false, false, true, true, false, true, true, false, \
     0, 4.0f, e_PageLayoutModeFlow, e_CForTable, e_CSinglePage, e_CAll, e_CColor, e_CJPG, \
-    {0}, {0}, 0, false, false \
+    {0}, {0}, 0, false, false, false, 0.0f, 0.0f, e_CBalanced, e_CWordPdfBookmarkNone \
 }
 
 #ifdef __cplusplus

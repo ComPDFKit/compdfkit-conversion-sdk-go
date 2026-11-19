@@ -25,9 +25,25 @@ func runConvert(fn converter, filePath, password, outputPath string, opts conver
 	defer C.free(unsafe.Pointer(cPwd))
 	defer C.free(unsafe.Pointer(cOut))
 
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
 	var cOpt C.GoConvertOption
+	fillCOption(&cOpt, opts, &pinner)
+
+	handle, cleanup := registerCallback(cb)
+	defer cleanup()
+
+	rc := fn(cFile, cPwd, cOut, &cOpt, handle, overrideFlags(cb))
+	return ErrorCode(rc).toError()
+}
+
+// fillCOption copies opts into the C-side option struct. The OCR language
+// array is pinned on pinner, so the caller must keep it alive for the call.
+func fillCOption(cOpt *C.GoConvertOption, opts convertOptions, pinner *runtime.Pinner) {
 	cOpt.enable_ai_layout = C.bool(opts.EnableAILayout)
 	cOpt.enable_ai_table_recognition = C.bool(opts.EnableAITableRecognition)
+	cOpt.table_recognition_accuracy = C.int(opts.TableRecognitionAccuracy)
+	cOpt.word_pdf_bookmark_mode = C.int(opts.WordPdfBookmarkMode)
 	cOpt.contain_image = C.bool(opts.ContainImage)
 	cOpt.contain_page_background_image = C.bool(opts.ContainPageBackgroundImage)
 	cOpt.json_contain_table = C.bool(opts.JSONContainTable)
@@ -35,6 +51,8 @@ func runConvert(fn converter, filePath, password, outputPath string, opts conver
 	cOpt.excel_all_content = C.bool(opts.ExcelAllContent)
 	cOpt.excel_csv_format = C.bool(opts.ExcelCSVFormat)
 	cOpt.enable_ocr = C.bool(opts.EnableOCR)
+	cOpt.enable_document_orientation_classification = C.bool(opts.EnableDocumentOrientationClassification)
+	cOpt.enable_document_dewarp = C.bool(opts.EnableDocumentDewarp)
 	cOpt.transparent_text = C.bool(opts.TransparentText)
 	cOpt.txt_table_format = C.bool(opts.TxtTableFormat)
 	cOpt.image_path_enhance = C.bool(opts.ImagePathEnhance)
@@ -48,16 +66,15 @@ func runConvert(fn converter, filePath, password, outputPath string, opts conver
 	cOpt.ocr_option = C.int(opts.OCROption)
 	cOpt.image_color_mode = C.int(opts.ImageColorMode)
 	cOpt.image_type = C.int(opts.ImageType)
+	cOpt.enable_auto_page_size = C.bool(opts.EnableAutoPageSize)
+	cOpt.custom_page_width = C.float(opts.CustomPageWidth)
+	cOpt.custom_page_height = C.float(opts.CustomPageHeight)
 
 	writeFixedString(&cOpt.font_name[0], len(cOpt.font_name), opts.FontName)
 	writeFixedString(&cOpt.page_ranges[0], len(cOpt.page_ranges), opts.PageRanges)
 
-	var pinner runtime.Pinner
-	defer pinner.Unpin()
-
-	var langs []C.int
 	if len(opts.Languages) > 0 {
-		langs = make([]C.int, len(opts.Languages))
+		langs := make([]C.int, len(opts.Languages))
 		for i, l := range opts.Languages {
 			langs[i] = C.int(l)
 		}
@@ -65,14 +82,6 @@ func runConvert(fn converter, filePath, password, outputPath string, opts conver
 		cOpt.languages = (*C.int)(unsafe.Pointer(&langs[0]))
 		cOpt.language_count = C.int(len(langs))
 	}
-	cOpt.enable_document_orientation_classification = C.bool(opts.EnableDocumentOrientationClassification)
-	cOpt.enable_document_dewarp = C.bool(opts.EnableDocumentDewarp)
-
-	handle, cleanup := registerCallback(cb)
-	defer cleanup()
-
-	rc := fn(cFile, cPwd, cOut, &cOpt, handle, overrideFlags(cb))
-	return ErrorCode(rc).toError()
 }
 
 func writeFixedString(buf *C.char, capacity int, s string) {
@@ -85,6 +94,26 @@ func writeFixedString(buf *C.char, capacity int, s string) {
 		n = capacity - 1
 	}
 	copy(dst[:n], s)
+}
+
+// StartWordToPDF converts a Word document to PDF. Only opts.PageRanges and
+// opts.WordPdfBookmarkMode take effect; the other WordOptions settings do not
+// apply to Word to PDF. The callback may be nil.
+func StartWordToPDF(filePath, outputPath string, opts WordOptions, cb ConvertCallback) error {
+	cFile := C.CString(filePath)
+	cOut := C.CString(outputPath)
+	defer C.free(unsafe.Pointer(cFile))
+	defer C.free(unsafe.Pointer(cOut))
+
+	var pinner runtime.Pinner
+	defer pinner.Unpin()
+	var cOpt C.GoConvertOption
+	fillCOption(&cOpt, opts.toConvert(), &pinner)
+
+	handle, cleanup := registerCallback(cb)
+	defer cleanup()
+	rc := C.compdf_go_word_to_pdf(cFile, cOut, &cOpt, handle, overrideFlags(cb))
+	return ErrorCode(rc).toError()
 }
 
 // StartPDFToWord converts a PDF document to a Word document.

@@ -50,6 +50,14 @@ func SetDocumentAIModel(modelPath string, gpuID int) error {
 	return ErrorCode(rc).toError()
 }
 
+// TableRecognitionAccuracy selects the table recognition resources.
+type TableRecognitionAccuracy int
+
+const (
+	TableRecognitionHighAccuracy TableRecognitionAccuracy = 0
+	TableRecognitionBalanced     TableRecognitionAccuracy = 1
+)
+
 // ReleaseDocumentAIModel frees memory held by the AI model. Call
 // SetDocumentAIModel again before reusing AI features.
 func ReleaseDocumentAIModel() {
@@ -76,6 +84,21 @@ func GetPageCount(filePath, password string) int {
 // license. See the C header for the special negative values.
 func GetRemainingPageQuota() int {
 	return int(C.compdf_go_get_remaining_page_quota())
+}
+
+// LicenseType is the type of the currently verified license.
+type LicenseType int
+
+const (
+	LicenseUnknown LicenseType = 0 // No license verified, verification failed, or the SDK is releasing.
+	LicenseTrial   LicenseType = 1 // Trial license.
+	LicenseFormal  LicenseType = 2 // Formal license.
+)
+
+// GetLicenseType returns the type of the currently verified license. It does
+// not verify the license again and does not consume page quota.
+func GetLicenseType() LicenseType {
+	return LicenseType(C.compdf_go_get_license_type())
 }
 
 // GetVersion returns the SDK version string.

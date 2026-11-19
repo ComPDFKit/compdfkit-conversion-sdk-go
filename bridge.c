@@ -108,6 +108,7 @@ static void fill_convert_option(CConvertOption* dst, const GoConvertOption* src,
     memset(dst, 0, sizeof(*dst));
     dst->enable_ai_layout = src->enable_ai_layout;
     dst->enable_ai_table_recognition = src->enable_ai_table_recognition;
+    dst->table_recognition_accuracy = (CTableRecognitionAccuracy)src->table_recognition_accuracy;
     dst->contain_image = src->contain_image;
     dst->contain_page_background_image = src->contain_page_background_image;
     dst->json_contain_table = src->json_contain_table;
@@ -115,6 +116,11 @@ static void fill_convert_option(CConvertOption* dst, const GoConvertOption* src,
     dst->excel_all_content = src->excel_all_content;
     dst->excel_csv_format = src->excel_csv_format;
     dst->enable_ocr = src->enable_ocr;
+    dst->enable_document_orientation_classification = src->enable_document_orientation_classification;
+    dst->enable_document_dewarp = src->enable_document_dewarp;
+    dst->enable_auto_page_size = src->enable_auto_page_size;
+    dst->custom_page_width = src->custom_page_width;
+    dst->custom_page_height = src->custom_page_height;
     dst->transparent_text = src->transparent_text;
     dst->txt_table_format = src->txt_table_format;
     dst->image_path_enhance = src->image_path_enhance;
@@ -128,6 +134,7 @@ static void fill_convert_option(CConvertOption* dst, const GoConvertOption* src,
     dst->ocr_option = (COCROption)src->ocr_option;
     dst->image_color_mode = (CImageColorMode)src->image_color_mode;
     dst->image_type = (CImageType)src->image_type;
+    dst->word_pdf_bookmark_mode = (CWordPdfBookmarkMode)src->word_pdf_bookmark_mode;
 
     strncpy(dst->font_name, src->font_name, sizeof(dst->font_name) - 1);
     dst->font_name[sizeof(dst->font_name) - 1] = '\0';
@@ -141,8 +148,6 @@ static void fill_convert_option(CConvertOption* dst, const GoConvertOption* src,
     }
     dst->languages = lang_buf;
     dst->language_count = n;
-    dst->enable_document_orientation_classification = src->enable_document_orientation_classification;
-    dst->enable_document_dewarp = src->enable_document_dewarp;
 }
 
 /* Build a populated CConvertCallback. Optional handlers (ocr/layout/table
@@ -255,8 +260,35 @@ int compdf_go_get_remaining_page_quota(void) {
     return CPDF_GetRemainingPageQuota();
 }
 
+int compdf_go_get_license_type(void) {
+    return (int)CPDF_GetLicenseType();
+}
+
 void compdf_go_get_version(char* version_buf) {
     CPDF_GetVersion(version_buf);
+}
+
+int compdf_go_word_to_pdf(const char* file_path, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb_handle, int callback_flags) {
+    /* Word->PDF reads only page_ranges and word_pdf_bookmark_mode. */
+    CConvertOption c_options;
+    COCRLanguage lang_buf[MAX_OCR_LANGUAGES];
+    fill_convert_option(&c_options, options, lang_buf, MAX_OCR_LANGUAGES);
+    CConvertCallback cb;
+    build_callback(&cb, cb_handle ? callback_flags : 0);
+    GoCallbackHandle previous = g_active_handle;
+    g_active_handle = cb_handle;
+    char diagnostics[CPDF_WORD_TO_PDF_DIAGNOSTICS_SIZE];
+#if defined(_WIN32)
+    wchar_t* w_file = utf8_to_wide(file_path);
+    wchar_t* w_out = utf8_to_wide(output_path);
+    CSDKErrorCode rc = CPDF_StartWordToPDF(w_file, w_out, c_options, cb_handle ? &cb : NULL, diagnostics);
+    FREE_PATH(w_file);
+    FREE_PATH(w_out);
+#else
+    CSDKErrorCode rc = CPDF_StartWordToPDF(file_path, output_path, c_options, cb_handle ? &cb : NULL, diagnostics);
+#endif
+    g_active_handle = previous;
+    return (int)rc;
 }
 
 int compdf_go_pdf_to_word(const char* file_path, const char* password, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb, int callback_flags) {

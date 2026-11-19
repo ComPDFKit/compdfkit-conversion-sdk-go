@@ -69,6 +69,11 @@ typedef struct {
     bool excel_all_content;
     bool excel_csv_format;
     bool enable_ocr;
+    bool enable_document_orientation_classification;
+    bool enable_document_dewarp;
+    bool enable_auto_page_size;
+    float custom_page_width;
+    float custom_page_height;
     bool transparent_text;
     bool txt_table_format;
     bool image_path_enhance;
@@ -89,8 +94,8 @@ typedef struct {
      * COCRLanguage array that the C SDK expects. */
     const int* languages;
     int language_count;
-    bool enable_document_orientation_classification;
-    bool enable_document_dewarp;
+    int table_recognition_accuracy;
+    int word_pdf_bookmark_mode;
 } GoConvertOption;
 
 /* Opaque handle used to identify a Go-side callback in the registry. 0 means
@@ -120,10 +125,13 @@ void compdf_go_release_document_ai_model(void);
 void compdf_go_set_document_ai_model_count(int layout_model_count, int table_model_count);
 int  compdf_go_get_page_count(const char* file_path, const char* password);
 int  compdf_go_get_remaining_page_quota(void);
+int  compdf_go_get_license_type(void);
 /* version_buf must be at least 64 bytes. */
 void compdf_go_get_version(char* version_buf);
 
 /* ----- Conversion functions. All accept UTF-8 paths. ----- */
+/* Word to PDF. */
+int compdf_go_word_to_pdf(const char* file_path, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb, int callback_flags);
 int compdf_go_pdf_to_word(const char* file_path, const char* password, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb, int callback_flags);
 int compdf_go_pdf_to_excel(const char* file_path, const char* password, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb, int callback_flags);
 int compdf_go_pdf_to_ppt(const char* file_path, const char* password, const char* output_path, const GoConvertOption* options, GoCallbackHandle cb, int callback_flags);
